@@ -1,0 +1,40 @@
+{
+  "name": "Matter.js Server",
+  "slug": "matterjs-server",
+  "categories": [
+    16
+  ],
+  "date_created": "2026-05-07",
+  "type": "ct",
+  "updateable": true,
+  "privileged": false,
+  "interface_port": 5580,
+  "documentation": "https://github.com/matter-js/matterjs-server",
+  "website": "https://www.openhomefoundation.org/",
+  "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/matter.webp",
+  "description": "Open Home Foundation Matter.js Server - a JavaScript-based Matter protocol controller with WebSocket API and web dashboard for managing Matter devices and networks.",
+  "install_methods": [
+    {
+      "type": "default",
+      "script": "ct/matterjs-server.sh",
+      "config_path": "/opt/matterjs-server/data",
+      "resources": {
+        "cpu": 4,
+        "ram": 4096,
+        "hdd": 10,
+        "os": "Debian",
+        "version": "13"
+      }
+    }
+  ],
+  "default_credentials": {
+    "username": null,
+    "password": null
+  },
+  "notes": [
+    {
+      "text": "This is a Beta version - may experience breaking changes during development.",
+      "type": "warning"
+    }
+  ]
+}

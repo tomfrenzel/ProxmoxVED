@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2021-2026 community-scripts ORG
+# Author: GitHub Copilot
+# License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
+# Source: https://github.com/matter-js/matterjs-server
+
+source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
+color
+verb_ip6
+catch_errors
+setting_up_container
+network_check
+update_os
+
+msg_info "Installing Dependencies"
+$STD apt install -y \
+  build-essential
+msg_ok "Installed Dependencies"
+
+NODE_VERSION="22" setup_nodejs
+
+fetch_and_deploy_gh_release "matter-server" "matter-js/matterjs-server" "tarball"
+
+msg_info "Building Application"
+cd /opt/matterjs-server
+$STD npm install
+$STD npm run build
+msg_ok "Built Application"
+
+msg_info "Creating Data Directory"
+mkdir -p /opt/matterjs-server/data
+msg_ok "Created Data Directory"
+
+msg_info "Creating Service"
+cat <<EOF >/etc/systemd/system/matterjs-server.service
+[Unit]
+Description=Matter.js Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/matterjs-server
+ExecStart=/usr/bin/node /opt/matterjs-server/packages/matter-server/dist/esm/MatterServer.js --storage-path /opt/matterjs-server/data --port 5580
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable -q --now matterjs-server
+msg_ok "Created Service"
+
+motd_ssh
+customize
+cleanup_lxc
