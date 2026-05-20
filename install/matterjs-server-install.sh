@@ -29,8 +29,18 @@ $STD npm run build
 msg_ok "Built Application"
 
 msg_info "Creating Data Directory"
-mkdir -p /opt/matterjs-server/data
+mkdir -p /opt/matterjs-server-data
 msg_ok "Created Data Directory"
+
+msg_info "Configuring Network"
+cat <<EOF >/etc/sysctl.d/60-ipv6-ra-rio.conf
+net.ipv6.conf.default.accept_ra_rtr_pref=1
+net.ipv6.conf.default.accept_ra_rt_info_max_plen=128
+net.ipv6.conf.eth0.accept_ra_rtr_pref=1
+net.ipv6.conf.eth0.accept_ra_rt_info_max_plen=128
+EOF
+$STD sysctl -p /etc/sysctl.d/60-ipv6-ra-rio.conf
+msg_ok "Configured Network"
 
 msg_info "Creating Service"
 cat <<EOF >/etc/systemd/system/matterjs-server.service
@@ -42,7 +52,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/matterjs-server
-ExecStart=/usr/bin/node /opt/matterjs-server/packages/matter-server/dist/esm/MatterServer.js --storage-path /opt/matterjs-server/data --port 5580
+ExecStart=/usr/bin/node /opt/matterjs-server/packages/matter-server/dist/esm/MatterServer.js --storage-path /opt/matterjs-server-data --port 5580
 Restart=on-failure
 RestartSec=5
 

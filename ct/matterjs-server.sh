@@ -5,7 +5,7 @@ source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxV
 # License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
 # Source: https://github.com/matter-js/matterjs-server
 
-APP="Matter.js Server"
+APP="Matter.js-Server"
 var_tags="${var_tags:-matter;iot;homeautomation}"
 var_cpu="${var_cpu:-4}"
 var_ram="${var_ram:-4096}"
@@ -34,10 +34,6 @@ function update_script() {
     systemctl stop matterjs-server
     msg_ok "Stopped Service"
 
-    msg_info "Backing up Data"
-    cp -r /opt/matterjs-server/data /opt/matterjs-server_data_backup
-    msg_ok "Backed up Data"
-
     CLEAN_INSTALL=1 fetch_and_deploy_gh_release "matter-server" "matter-js/matterjs-server" "tarball"
 
     msg_info "Building Application"
@@ -45,11 +41,6 @@ function update_script() {
     $STD npm install
     $STD npm run build
     msg_ok "Built Application"
-
-    msg_info "Restoring Data"
-    cp -r /opt/matterjs-server_data_backup/. /opt/matterjs-server/data
-    rm -rf /opt/matterjs-server_data_backup
-    msg_ok "Restored Data"
 
     msg_info "Starting Service"
     systemctl start matterjs-server
