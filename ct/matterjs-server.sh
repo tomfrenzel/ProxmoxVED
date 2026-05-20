@@ -5,7 +5,7 @@ source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxV
 # License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
 # Source: https://github.com/matter-js/matterjs-server
 
-APP="Matter.js-Server"
+APP="matterjs-server"
 var_tags="${var_tags:-matter;iot;homeautomation}"
 var_cpu="${var_cpu:-4}"
 var_ram="${var_ram:-4096}"
