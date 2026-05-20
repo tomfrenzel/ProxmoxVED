@@ -13,14 +13,9 @@ setting_up_container
 network_check
 update_os
 
-msg_info "Installing Dependencies"
-$STD apt install -y \
-  build-essential
-msg_ok "Installed Dependencies"
-
 NODE_VERSION="22" setup_nodejs
 
-fetch_and_deploy_gh_release "matter-server" "matter-js/matterjs-server" "tarball"
+fetch_and_deploy_gh_release "matterjs-server" "matter-js/matterjs-server" "tarball"
 
 msg_info "Building Application"
 cd /opt/matterjs-server
