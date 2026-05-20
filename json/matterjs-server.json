@@ -19,9 +19,9 @@
       "script": "ct/matterjs-server.sh",
       "config_path": "/opt/matterjs-server/data",
       "resources": {
-        "cpu": 4,
-        "ram": 4096,
-        "hdd": 10,
+        "cpu": 1,
+        "ram": 1024,
+        "hdd": 4,
         "os": "Debian",
         "version": "13"
       }
@@ -33,7 +33,11 @@
   },
   "notes": [
     {
-      "text": "This is a Beta version - may experience breaking changes during development.",
+      "text": "The Matter.js Server exposes a WebSocket API on port 5580 for integration with Home Assistant or other consumers.",
+      "type": "info"
+    },
+    {
+      "text": "For Thread-based devices, ensure IPv6 is properly configured on the host network.",
       "type": "warning"
     }
   ]
