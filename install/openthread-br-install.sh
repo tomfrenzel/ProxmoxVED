@@ -34,7 +34,8 @@ $STD apt install -y \
   libnetfilter-queue-dev \
   libprotobuf-dev \
   protobuf-compiler \
-  socat
+  socat \
+  libsystemd-dev
 msg_ok "Installed Dependencies"
 
 setup_nodejs
@@ -51,8 +52,7 @@ mkdir -p build && cd build
 $STD cmake -GNinja \
   -DBUILD_TESTING=OFF \
   -DCMAKE_INSTALL_PREFIX=/usr \
-  -DOTBR_ENABLE_SYSTEMD=ON\
-  -DOTBR_ENABLE_INITSCRIPT=OFF \
+  -DOTBR_SYSTEMD_UNIT_DIR=/lib/systemd/system \
   -DOTBR_DBUS=ON \
   -DOTBR_MDNS=openthread \
   -DOTBR_REST=ON \
