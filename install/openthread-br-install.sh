@@ -48,12 +48,18 @@ $STD git submodule update --depth 1 --init --recursive
 msg_ok "Cloned OpenThread Border Router"
 
 msg_info "Building OpenThread Border Router (Patience)"
+mkdir -p /usr/lib/pkgconfig
+cat <<'EOF' >/usr/lib/pkgconfig/systemd.pc
+prefix=/usr
+systemdsystemunitdir=/lib/systemd/system
+Name: systemd
+Description: systemd
+Version: 250
+EOF
 mkdir -p build && cd build
 $STD cmake -GNinja \
   -DBUILD_TESTING=OFF \
   -DCMAKE_INSTALL_PREFIX=/usr \
-  -DOTBR_SYSTEMD_UNIT_DIR=/lib/systemd/system \
-  -DINSTALL_SYSTEMD_UNIT=OFF \
   -DOTBR_DBUS=ON \
   -DOTBR_MDNS=openthread \
   -DOTBR_REST=ON \
