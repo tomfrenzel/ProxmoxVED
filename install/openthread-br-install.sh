@@ -53,6 +53,7 @@ $STD cmake -GNinja \
   -DBUILD_TESTING=OFF \
   -DCMAKE_INSTALL_PREFIX=/usr \
   -DOTBR_SYSTEMD_UNIT_DIR=/lib/systemd/system \
+  -DINSTALL_SYSTEMD_UNIT=OFF \
   -DOTBR_DBUS=ON \
   -DOTBR_MDNS=openthread \
   -DOTBR_REST=ON \
@@ -97,6 +98,8 @@ EOF
 cat <<'EOF' >/etc/default/otbr-web
 OTBR_WEB_OPTS="-I wpan0 -a 0.0.0.0 -p 80"
 EOF
+rm -f /etc/init.d/otbr-agent /etc/init.d/otbr-web
+systemctl daemon-reload
 systemctl enable -q dbus rsyslog otbr-agent otbr-web
 systemctl enable -q bind9 2>/dev/null || systemctl enable -q named 2>/dev/null || true
 systemctl start -q dbus rsyslog bind9
