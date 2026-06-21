@@ -5,7 +5,7 @@ source <(curl -fsSL https://raw.githubusercontent.com/tomfrenzel/ProxmoxVED/dmar
 # License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
 # Source: https://github.com/dmarcguardhq/dmarcguard
 
-APP="DMARCGuard"
+APP="DMARCguard"
 var_tags="${var_tags:-homelab}"
 var_cpu="${var_cpu:-1}"
 var_ram="${var_ram:-512}"
@@ -35,7 +35,7 @@ function update_script() {
     systemctl stop dmarcguard
     msg_ok "Stopped Services"
 
-    fetch_and_deploy_gh_release "dmarcguard" "dmarcguardhq/dmarcguard" "prebuild" "latest" "/opt/dmarcguard" "parse-dmarc_linux_amd64.tar.gz"
+    fetch_and_deploy_gh_release "dmarcguard" "dmarcguardhq/dmarcguard" "prebuild" "latest" "/opt/dmarcguard" "dmarcguard_linux_amd64.tar.gz"
 
     msg_info "Starting Services"
     systemctl start dmarcguard

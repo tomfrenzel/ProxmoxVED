@@ -13,7 +13,7 @@ setting_up_container
 network_check
 update_os
 
-fetch_and_deploy_gh_release "dmarcguard" "dmarcguardhq/dmarcguard" "prebuild" "latest" "/opt/dmarcguard" "parse-dmarc_linux_amd64.tar.gz"
+fetch_and_deploy_gh_release "dmarcguard" "dmarcguardhq/dmarcguard" "prebuild" "latest" "/opt/dmarcguard" "dmarcguard_linux_amd64.tar.gz"
 
 msg_info "Generating initial configuration"
 cd /opt/dmarcguard
