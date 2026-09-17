@@ -4,9 +4,9 @@ source "$_cs_boot" 2>/dev/null || source <(curl -fsSL "${COMMUNITY_SCRIPTS_CORE_
 # Copyright (c) 2021-2026 community-scripts ORG
 # Author: Tom Frenzel (tomfrenzel)
 # License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
-# Source: https://github.com/dmarcguardhq/dmarcguard
+# Source: https://github.com/dmarcguardhq/parse-dmarc
 
-APP="DMARCguard"
+APP="Parse-DMARC"
 var_tags="${var_tags:-homelab}"
 var_cpu="${var_cpu:-1}"
 var_ram="${var_ram:-512}"
@@ -26,20 +26,20 @@ function update_script() {
   check_container_storage
   check_container_resources
 
-  if [[ ! -d /opt/dmarcguard ]]; then
+  if [[ ! -d /opt/parse-dmarc ]]; then
     msg_error "No ${APP} Installation Found!"
     exit 1
   fi
 
   if check_for_gh_release "parse-dmarc" "dmarcguardhq/parse-dmarc"; then
     msg_info "Stopping Services"
-    systemctl stop dmarcguard
+    systemctl stop parse-dmarc
     msg_ok "Stopped Services"
 
-    fetch_and_deploy_gh_release "parse-dmarc" "dmarcguardhq/parse-dmarc" "prebuild" "latest" "/opt/dmarcguard" "parse-dmarc_linux_amd64.tar.gz"
+    fetch_and_deploy_gh_release "parse-dmarc" "dmarcguardhq/parse-dmarc" "prebuild" "latest" "/opt/parse-dmarc" "parse-dmarc_linux_amd64.tar.gz"
 
     msg_info "Starting Services"
-    systemctl start dmarcguard
+    systemctl start parse-dmarc
     msg_ok "Started Services"
 
     msg_ok "Updated successfully!"
