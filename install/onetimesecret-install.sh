@@ -21,6 +21,7 @@ $STD apt install -y \
   libgmp-dev \
   libpq-dev \
   libreadline-dev \
+  libsodium23 \
   libsqlite3-dev \
   libssl-dev \
   libxml2-dev \
@@ -35,8 +36,8 @@ msg_ok "Installed Dependencies"
 
 fetch_and_deploy_gh_release "onetimesecret" "onetimesecret/onetimesecret" "tarball"
 
-RUBY_VERSION=$(sed -n "s/^ruby '>= \([0-9.]*\)'.*/\1/p" /opt/onetimesecret/Gemfile)
-RUBY_VERSION="${RUBY_VERSION:-3.4.7}" setup_ruby
+RUBY_VERSION=$(tr -d ' \n' </opt/onetimesecret/.ruby-version 2>/dev/null)
+RUBY_VERSION="${RUBY_VERSION:-3.4.10}" setup_ruby
 
 PNPM_VERSION=$(sed -n 's/.*"packageManager": "pnpm@\([^"]*\)".*/\1/p' /opt/onetimesecret/package.json)
 NODE_VERSION=$(tr -d ' \n' </opt/onetimesecret/.nvmrc 2>/dev/null)
@@ -56,7 +57,7 @@ esac
 msg_info "Configuring Application"
 systemctl enable -q --now redis-server
 cd /opt/onetimesecret
-$STD bash ./install.sh init
+$STD bash bin/setup init
 sed -i \
   -e "s|^REDIS_URL=.*|REDIS_URL=redis://127.0.0.1:6379/0|" \
   -e "s|^HOST=.*|HOST=${HOST_VALUE//&/\\&}|" \
@@ -81,7 +82,7 @@ msg_ok "Configured Application"
 
 msg_info "Reconciling Application"
 cd /opt/onetimesecret
-$STD bash ./install.sh reconcile
+$STD bash bin/setup reconcile
 msg_ok "Reconciled Application"
 
 msg_info "Building Frontend"
@@ -102,7 +103,8 @@ User=root
 WorkingDirectory=/opt/onetimesecret
 Environment=HOME=/root
 Environment=PATH=/root/.rbenv/shims:/root/.rbenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ExecStart=/bin/bash -lc 'source .env.sh && exec bundle exec puma -C etc/puma.rb'
+EnvironmentFile=/opt/onetimesecret/.env
+ExecStart=/root/.rbenv/shims/bundle exec puma -C etc/puma.rb
 Restart=on-failure
 RestartSec=5
 

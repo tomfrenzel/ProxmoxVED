@@ -30,19 +30,19 @@ msg_ok "Installed Dependencies"
 setup_rust
 fetch_and_deploy_gh_release "wasm-pack" "rustwasm/wasm-pack" "prebuild" "latest" "/usr/local/bin" "wasm-pack-v*-x86_64-unknown-linux-musl.tar.gz"
 
-NODE_VERSION="20" setup_nodejs
+NODE_VERSION="24" setup_nodejs
 
 msg_info "Installing .NET SDK 10.0"
 setup_deb822_repo "microsoft-prod" \
-  "https://packages.microsoft.com/keys/microsoft.asc" \
-  "https://packages.microsoft.com/debian/12/prod" \
-  "bookworm" \
+  "https://packages.microsoft.com/keys/microsoft-2025.asc" \
+  "https://packages.microsoft.com/debian/13/prod" \
+  "trixie" \
   "main" \
   "amd64"
 $STD apt install -y dotnet-sdk-10.0
 msg_ok "Installed .NET SDK 10.0"
 
-PG_VERSION="16" setup_postgresql
+PG_VERSION="18" setup_postgresql
 PG_DB_NAME="aliasvault" PG_DB_USER="aliasvault" setup_postgresql_db
 
 fetch_and_deploy_gh_release "aliasvault" "aliasvault/aliasvault" "tarball"
@@ -53,21 +53,6 @@ $STD rustup target add wasm32-unknown-unknown
 cd /opt/aliasvault/core
 $STD bash build-and-distribute.sh --browser
 msg_ok "Built Core Libraries"
-
-msg_info "Copying Core Artifacts"
-mkdir -p /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/wasm
-cp /opt/aliasvault/core/rust/dist/wasm/aliasvault_core_bg.wasm \
-  /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/wasm/
-cp /opt/aliasvault/core/rust/dist/wasm/aliasvault_core.js \
-  /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/wasm/
-mkdir -p /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/js/dist/core/{identity-generator,password-generator,vault}
-cp -r /opt/aliasvault/core/typescript/identity-generator/dist/. \
-  /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/js/dist/core/identity-generator/
-cp -r /opt/aliasvault/core/typescript/password-generator/dist/. \
-  /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/js/dist/core/password-generator/
-cp -r /opt/aliasvault/core/vault/dist/. \
-  /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/js/dist/core/vault/
-msg_ok "Copied Core Artifacts"
 
 msg_info "Building AliasVault Applications (Patience)"
 cd /opt/aliasvault/apps/server

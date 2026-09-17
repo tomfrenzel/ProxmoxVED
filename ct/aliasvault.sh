@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVED/main/misc/build.func)
+_cs_boot="${COMMUNITY_SCRIPTS_CORE_DIR:-$(dirname "${BASH_SOURCE[0]}")/../../core}/core/build.func"
+source "$_cs_boot" 2>/dev/null || source <(curl -fsSL "${COMMUNITY_SCRIPTS_CORE_URL:-https://raw.githubusercontent.com/community-scripts/core/main}/core/build.func")
 # Copyright (c) 2021-2026 community-scripts ORG
 # Author: ProxmoxVED Community
 # License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
@@ -9,11 +10,12 @@ APP="AliasVault"
 var_tags="${var_tags:-security;passwords;privacy}"
 var_cpu="${var_cpu:-4}"
 var_ram="${var_ram:-6144}"
-var_disk="${var_disk:-30}"
+var_disk="${var_disk:-24}"
 var_os="${var_os:-debian}"
-var_version="${var_version:-12}"
-var_arm64="${var_arm64:-no}"
+var_version="${var_version:-13}"
+#var_arm64="${var_arm64:-no}" # unset = ask the user; set yes/no only when verified
 var_unprivileged="${var_unprivileged:-1}"
+var_testurl="${var_testurl:-https://github.com/community-scripts/ProxmoxVED/issues/1827}"
 
 header_info "$APP"
 variables
@@ -47,21 +49,6 @@ function update_script() {
     cd /opt/aliasvault/core
     $STD bash build-and-distribute.sh --browser
     msg_ok "Built Core Libraries"
-
-    msg_info "Copying Core Artifacts"
-    mkdir -p /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/wasm
-    cp /opt/aliasvault/core/rust/dist/wasm/aliasvault_core_bg.wasm \
-      /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/wasm/
-    cp /opt/aliasvault/core/rust/dist/wasm/aliasvault_core.js \
-      /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/wasm/
-    mkdir -p /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/js/dist/core/{identity-generator,password-generator,vault}
-    cp -r /opt/aliasvault/core/typescript/identity-generator/dist/. \
-      /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/js/dist/core/identity-generator/
-    cp -r /opt/aliasvault/core/typescript/password-generator/dist/. \
-      /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/js/dist/core/password-generator/
-    cp -r /opt/aliasvault/core/vault/dist/. \
-      /opt/aliasvault/apps/server/AliasVault.Client/wwwroot/js/dist/core/vault/
-    msg_ok "Copied Core Artifacts"
 
     msg_info "Building AliasVault Applications (Patience)"
     cd /opt/aliasvault/apps/server
@@ -100,7 +87,7 @@ description
 
 msg_ok "Completed Successfully!\n"
 echo -e "${CREATING}${GN}${APP} setup has been successfully initialized!${CL}"
-echo -e "${INFO}${YW} Access it using the following URL:${CL}"
-echo -e "${TAB}${GATEWAY}${BGN}https://${IP}${CL}"
-echo -e "${INFO}${YW} Admin Panel:${CL} ${TAB}${GATEWAY}${BGN}https://${IP}/admin${CL}"
+echo -e "${INFO}${YW}Access it using the following URL:${CL}"
+echo -e "${GATEWAY}${BGN}https://${IP}${CL}"
+echo -e "${INFO}${YW} Admin Panel:${CL} ${GATEWAY}${BGN}https://${IP}/admin${CL}"
 echo -e "${INFO}${YW} Admin credentials were shown in the installation output above.${CL}"

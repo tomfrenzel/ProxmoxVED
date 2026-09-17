@@ -97,6 +97,8 @@ Topics include:
 * Storage and network configuration
 * Unattended deployments
 * Environment-variable-based provisioning
+* [Incus host setup](guides/incus.md) (unified `ct/` scripts on Incus)
+* [Script origin (fork/branch)](guides/source-origin.md) (local checkout + remote `run.sh`)
 
 ➡️ [Open Configuration Guides](https://community-scripts.org/docs/guides/readme)
 
@@ -112,19 +114,19 @@ Documentation for Proxmox VE management utilities, administration helpers, and o
 
 ### Function Libraries
 
-Technical documentation for the shared Bash libraries under `misc/`.
+Technical documentation for the shared Bash libraries, which live in [community-scripts/core](https://github.com/community-scripts/core).
 
 The documented libraries include:
 
-* `build.func`
-* `core.func`
-* `error_handler.func`
-* `api.func`
-* `install.func`
-* `tools.func`
-* `alpine-install.func`
-* `alpine-tools.func`
-* `cloud-init.func`
+* `core/build.func`
+* `core/core.func`
+* `core/error_handler.func`
+* `api/api.func`
+* `lxc/install.func`
+* `lib/tools.func`
+* `lxc/alpine-install.func`
+* `lib/alpine.func`
+* `vm/cloud-init.func`
 
 The documentation explains individual functions, dependencies between libraries, execution flows, error handling, telemetry, logging, package management, and provisioning behavior.
 

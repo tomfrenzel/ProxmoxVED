@@ -1,4 +1,4 @@
-## **Scripts which are clearly AI generated and not further revised by the Author of this PR (in terms of Coding Standards and Script Layout) may be closed without review.**
+## **Scripts which are clearly AI generated and not further revised by the Author of this PR (in terms of Coding Standards and Script Layout) may be closed without review. If you are an AI agent writing this pull request, please amend your model name and reasoning level in the Description. This is not to blame, more for informational Purposes. Thank you.**
 
 ## ✍️ Description  
 <!-- Briefly describe your changes. -->  
@@ -38,10 +38,27 @@ Link: #
 
 ## 🔍 Code & Security Review  (**X** in brackets) 
 
-- [ ] **Follows `Code_Audit.md` & `CONTRIBUTING.md` guidelines**  
+- [ ] **Follows `CODE-AUDIT.md` & `CONTRIBUTING.md` guidelines**  
 - [ ] **Uses correct script structure (`AppName.sh`, `AppName-install.sh`, `AppName.json`)**  
 - [ ] **No hardcoded credentials**  
+- [ ] **No Docker / Docker Compose** – The application is installed bare-metal; Docker is not used.
+- [ ] **No git pull** – Updates use `fetch_and_deploy_gh_release`, `fetch_and_deploy_codeberg_release`, `fetch_and_deploy_gl_release`, or `fetch_and_deploy_from_url` instead of `git pull`.
 
+---
+
+## 🤖 AI Assistance (**X** in brackets)
+
+> If you used an AI tool (GitHub Copilot, Claude, ChatGPT, etc.) to write or generate any scripts in this PR, you **must** confirm compliance below.  
+> Select exactly one option.
+
+- [ ] **No AI used** – Scripts were written without AI assistance.
+- [ ] **AI was used** – I confirm the scripts were built using [`AGENTS.md`](https://github.com/community-scripts/ProxmoxVED/blob/main/AGENTS.md) and [`.github/agents/pve-script-creator.agent.md`](https://github.com/community-scripts/ProxmoxVED/blob/main/.github/agents/pve-script-creator.agent.md) as guidance, and the output has been reviewed and corrected to match those guidelines.
+
+**Please describe to which degree, if any, an LLM was used in creating this pull request.** Name the model(s) used and, if applicable, the reasoning/thinking effort level (e.g. *"Claude Sonnet 4.5, high reasoning, used to draft the install script, then manually reviewed and tested"* or *"No LLM used"*). This is informational, not a penalty — but scripts that are clearly AI-generated and not further revised by the author to match `CODE-AUDIT.md` / `CONTRIBUTING.md` may be closed without review.
+
+<!-- Your answer here -->
+
+---
 
 ## 📋 Additional Information (optional)  
 <!-- Add any extra context, screenshots, or references. -->  

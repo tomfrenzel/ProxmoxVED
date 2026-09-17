@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVED/main/misc/build.func)
+_cs_boot="${COMMUNITY_SCRIPTS_CORE_DIR:-$(dirname "${BASH_SOURCE[0]}")/../../core}/core/build.func"
+source "$_cs_boot" 2>/dev/null || source <(curl -fsSL "${COMMUNITY_SCRIPTS_CORE_URL:-https://raw.githubusercontent.com/community-scripts/core/main}/core/build.func")
 # Copyright (c) 2021-2026 community-scripts ORG
 # Author: Hai Tran (epiHATR)
 # License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
@@ -12,8 +13,9 @@ var_ram="${var_ram:-4096}"
 var_disk="${var_disk:-10}"
 var_os="${var_os:-debian}"
 var_version="${var_version:-13}"
-var_arm64="${var_arm64:-no}"
+#var_arm64="${var_arm64:-no}" # unset = ask the user; set yes/no only when verified
 var_unprivileged="${var_unprivileged:-1}"
+var_testurl="${var_testurl:-https://github.com/community-scripts/ProxmoxVED/issues/1882}"
 
 header_info "$APP"
 variables
@@ -51,8 +53,8 @@ function update_script() {
 
     CLEAN_INSTALL=1 fetch_and_deploy_gh_release "onetimesecret" "onetimesecret/onetimesecret" "tarball"
 
-    RUBY_VERSION=$(sed -n "s/^ruby '>= \([0-9.]*\)'.*/\1/p" /opt/onetimesecret/Gemfile)
-    RUBY_VERSION="${RUBY_VERSION:-3.4.7}" setup_ruby
+    RUBY_VERSION=$(tr -d ' \n' </opt/onetimesecret/.ruby-version 2>/dev/null)
+    RUBY_VERSION="${RUBY_VERSION:-3.4.10}" setup_ruby
 
     PNPM_VERSION=$(sed -n 's/.*"packageManager": "pnpm@\([^"]*\)".*/\1/p' /opt/onetimesecret/package.json)
     NODE_VERSION=$(tr -d ' \n' </opt/onetimesecret/.nvmrc 2>/dev/null)
@@ -64,7 +66,7 @@ function update_script() {
     systemctl enable -q --now redis-server
     cd /opt/onetimesecret
     mkdir -p tmp/pids log
-    $STD bash ./install.sh reconcile
+    $STD bash bin/setup reconcile
     msg_ok "Reconciled Application"
 
     msg_info "Building Frontend"
@@ -96,7 +98,7 @@ esac
 
 msg_ok "Completed Successfully!\n"
 echo -e "${CREATING}${GN}${APP} setup has been successfully initialized!${CL}"
-echo -e "${INFO}${YW} Access it using the following URL:${CL}"
-echo -e "${TAB}${GATEWAY}${BGN}${DISPLAY_SCHEME}://${DISPLAY_HOST}${CL}"
+echo -e "${INFO}${YW}Access it using the following URL:${CL}"
+echo -e "${GATEWAY}${BGN}${DISPLAY_SCHEME}://${DISPLAY_HOST}${CL}"
 echo -e "${INFO}${YW} Configure hostname, TLS, and SMTP settings in:${CL}"
 echo -e "${TAB}${BGN}/opt/onetimesecret/.env${CL}"

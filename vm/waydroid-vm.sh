@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
 # Copyright (c) 2021-2026 community-scripts ORG
-# Author: community-scripts ORG
+# Author: MickLesk (CanbiZ)
 # License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
 # Source: https://waydro.id/
 
-source <(curl -fsSL "${COMMUNITY_SCRIPTS_URL:-https://git.community-scripts.org/community-scripts/ProxmoxVED/raw/branch/main}/misc/vm-core.func")
+COMMUNITY_SCRIPTS_URL="${COMMUNITY_SCRIPTS_URL:-https://raw.githubusercontent.com/community-scripts/ProxmoxVED/main}"
+source <(curl -fsSL "${COMMUNITY_SCRIPTS_CORE_URL:-https://raw.githubusercontent.com/community-scripts/core/main}/pve/vm-core.func")
 load_functions
 
 function header_info {
@@ -46,45 +47,42 @@ trap 'post_update_to_api "failed" "130"' SIGINT
 trap 'post_update_to_api "failed" "143"' SIGTERM
 trap 'post_update_to_api "failed" "129"; exit 129' SIGHUP
 
+vm_require_arch amd64
+
 TEMP_DIR=$(mktemp -d)
 pushd "$TEMP_DIR" >/dev/null
 
-if vm_confirm_new_vm "$APP" "This will create a New $APP. Proceed?"; then
-  :
-else
-  header_info && exit_script
-fi
-
-check_root
-arch_check
-pve_check
-ssh_check
+vm_preflight
 
 # ---------------------------------------------------------------------------
 # OS Selection
 # ---------------------------------------------------------------------------
 function select_os() {
-  local choice
-  if choice=$(whiptail --backtitle "Proxmox VE Helper Scripts" --title "OS SELECTION" \
+  if [[ "${VM_UNATTENDED:-0}" == "1" ]]; then
+    OS_CHOICE="${VM_OS_VERSION:-ubuntu2404}"
+  elif ! OS_CHOICE=$(whiptail --backtitle "Proxmox VE Helper Scripts" --title "OS SELECTION" \
     --radiolist "Choose the base operating system:" --cancel-button Exit-Script 12 68 2 \
     "ubuntu2404" "Ubuntu 24.04 LTS (Noble Numbat)" ON \
     "debian13" "Debian 13 (Trixie)" OFF \
     3>&1 1>&2 2>&3); then
-    OS_CHOICE="$choice"
-    case "$OS_CHOICE" in
-    ubuntu2404)
-      OS_LABEL="Ubuntu 24.04 LTS (Noble Numbat)"
-      OS_CODENAME="noble"
-      ;;
-    debian13)
-      OS_LABEL="Debian 13 (Trixie)"
-      OS_CODENAME="trixie"
-      ;;
-    esac
-    echo -e "${OS}${BOLD}${DGN}Base OS: ${BGN}${OS_LABEL}${CL}"
-  else
     exit_script
   fi
+
+  case "$OS_CHOICE" in
+  ubuntu2404)
+    OS_LABEL="Ubuntu 24.04 LTS (Noble Numbat)"
+    OS_CODENAME="noble"
+    ;;
+  debian13)
+    OS_LABEL="Debian 13 (Trixie)"
+    OS_CODENAME="trixie"
+    ;;
+  *)
+    msg_error "Unsupported OS '${OS_CHOICE}' (expected ubuntu2404 or debian13)"
+    exit 1
+    ;;
+  esac
+  echo -e "${OS}${BOLD}${DGN}Base OS: ${BGN}${OS_LABEL}${CL}"
 }
 
 select_os
@@ -138,6 +136,7 @@ function advanced_settings() {
   vm_prompt_mac "$GEN_MAC"
   vm_prompt_vlan
   vm_prompt_mtu
+  vm_prompt_verbose "no"
   vm_prompt_start_vm "yes"
 
   if vm_confirm_advanced_settings "Ready to create a ${OS_LABEL} Waydroid VM?"; then
@@ -149,19 +148,8 @@ function advanced_settings() {
   fi
 }
 
-function start_script() {
-  if vm_choose_settings_mode; then
-    header_info
-    echo -e "${DEFAULT}${BOLD}${BL}Using Default Settings${CL}"
-    default_settings
-  else
-    header_info
-    echo -e "${ADVANCED}${BOLD}${RD}Using Advanced Settings${CL}"
-    advanced_settings
-  fi
-}
 
-start_script
+vm_start_script "Use Default Settings?\n\nDefaults:\n• 4 CPU Cores\n• 4 GB RAM\n• 20 GB Disk" 13 58
 post_to_api_vm
 
 vm_select_storage "$HN"
@@ -194,13 +182,8 @@ CACHE_DIR="/var/lib/vz/template/cache"
 CACHE_FILE="${CACHE_DIR}/$(basename "$URL")"
 mkdir -p "$CACHE_DIR"
 
-if [[ ! -s "$CACHE_FILE" ]]; then
-  curl -f#SL -o "$CACHE_FILE" "$URL"
-  echo -en "\e[1A\e[0K"
-  msg_ok "Downloaded ${CL}${BL}$(basename "$CACHE_FILE")${CL}"
-else
-  msg_ok "Using cached image ${CL}${BL}$(basename "$CACHE_FILE")${CL}"
-fi
+MIN_IMAGE_BYTES=$((100 * 1024 * 1024))
+vm_fetch_image "$URL" "$CACHE_FILE" --cache --min-bytes "$MIN_IMAGE_BYTES" || exit 115
 
 # ---------------------------------------------------------------------------
 # Customize disk image with Waydroid pre-installed (offline via virt-customize)
@@ -244,9 +227,7 @@ virt-customize -q -a "$WORK_FILE" \
 msg_ok "Configured binder kernel module"
 
 msg_info "Finalizing image"
-virt-customize -q -a "$WORK_FILE" --hostname "${HN}" >/dev/null 2>&1 || true
-virt-customize -q -a "$WORK_FILE" --run-command "truncate -s 0 /etc/machine-id" >/dev/null 2>&1 || true
-virt-customize -q -a "$WORK_FILE" --run-command "rm -f /var/lib/dbus/machine-id" >/dev/null 2>&1 || true
+vm_prepare_cloud_image "$WORK_FILE" "$HN" || true
 if [ "$USE_CLOUD_INIT" = "yes" ]; then
   virt-customize -q -a "$WORK_FILE" \
     --run-command "sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config" >/dev/null 2>&1 || true
@@ -312,8 +293,7 @@ qm set $VMID \
   -serial0 socket >/dev/null
 set_description
 
-msg_info "Resizing disk to $DISK_SIZE"
-qm resize $VMID scsi0 ${DISK_SIZE} >/dev/null
+vm_resize_disk
 
 rm -f "$WORK_FILE"
 
@@ -332,7 +312,7 @@ fi
 msg_ok "Created a ${OS_LABEL} Waydroid VM ${CL}${BL}(${HN})"
 if [ "$START_VM" = "yes" ]; then
   msg_info "Starting Waydroid VM"
-  qm start $VMID
+  $STD qm start $VMID
   msg_ok "Started Waydroid VM"
 fi
 
