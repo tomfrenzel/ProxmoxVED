@@ -17,7 +17,7 @@ fetch_and_deploy_gh_release "parse-dmarc" "dmarcguardhq/parse-dmarc" "prebuild" 
 
 msg_info "Generating initial configuration"
 cd /opt/parse-dmarc
-./parse-dmarc --gen-config
+$STD ./parse-dmarc --gen-config
 msg_ok "Generated initial configuration"
 
 msg_info "Creating Service"
