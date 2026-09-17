@@ -31,12 +31,12 @@ function update_script() {
     exit 1
   fi
 
-  if check_for_gh_release "dmarcguard" "dmarcguardhq/dmarcguard"; then
+  if check_for_gh_release "dmarcguard" "dmarcguardhq/parse-dmarc"; then
     msg_info "Stopping Services"
     systemctl stop dmarcguard
     msg_ok "Stopped Services"
 
-    fetch_and_deploy_gh_release "dmarcguard" "dmarcguardhq/dmarcguard" "prebuild" "latest" "/opt/dmarcguard" "dmarcguard_linux_amd64.tar.gz"
+    fetch_and_deploy_gh_release "dmarcguard" "dmarcguardhq/parse-dmarc" "prebuild" "latest" "/opt/dmarcguard" "parse-dmarc_linux_amd64.tar.gz"
 
     msg_info "Starting Services"
     systemctl start dmarcguard
